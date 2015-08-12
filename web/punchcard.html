@@ -10,9 +10,11 @@ g.species.active{cursor:pointer;}
 text.label{font-size:12px;font-weight:bold;cursor:pointer;}
 text.column{font-size:12px;font-weight:bold;}
 text.value{font-size:12px;font-weight:bold;}
-
+.div-header{position: fixed; background-color: white; margin-top: 0px;}
 </style>
 <body>
+  <div class="div-header"></div>
+  <div class="div-body"></div>
 </body>
 <script src="d3.v3.min.js"></script>
 <script>
@@ -48,9 +50,16 @@ var xAxis = d3.svg.axis()
 var formatYears = d3.format("0000");
 xAxis.tickFormat(formatYears);
 
-var svg = d3.select("body").append("svg")
+var svg_header =  d3.select(".div-header").append("svg")
   .attr("width", width + margin.left + margin.right)
-  .attr("height", height + margin.top + margin.bottom)
+  .attr("height", margin.top)
+  .style("margin-left", margin.left + "px")
+  .append("g")
+  .attr("transform", "translate(" + margin.left + "," + 37 + ")");
+
+var svg = d3.select(".div-body").append("svg")
+  .attr("width", width + margin.left + margin.right)
+  .attr("height", height + margin.bottom)
   .style("margin-left", margin.left + "px")
   .append("g")
   .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
@@ -62,12 +71,12 @@ d3.json("../data/web_data.json", function(data) {
     .domain([start_year, end_year])
     .range([0, width]);
 
-  svg.append("g")
+  svg_header.append("g")
     .attr("class", "x axis")
     .attr("transform", "translate(0," + 0 + ")")
     .call(xAxis);
 
-  var header = svg.append("g")
+  var header = svg_header.append("g")
     .attr("class", "header");
 
   header   
