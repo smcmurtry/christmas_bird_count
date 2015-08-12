@@ -9,7 +9,7 @@ body{font-family: Arial, sans-serif;font-size:10px;}
 g.species.active{cursor:pointer;}
 text.label{font-size:12px;font-weight:bold;cursor:pointer;}
 text.column{font-size:12px;font-weight:bold;}
-text.value{font-size:12px;font-weight:bold;}
+text.value{font-size:10px;font-weight:bold;}
 .div-header{position: fixed; background-color: white; margin-top: 0px;}
 </style>
 <body>
@@ -120,12 +120,16 @@ d3.json("../data/web_data_cp.json", function(data) {
 
     text
       .attr("text-anchor", "middle")
-      .attr("y", j*20+25)
+      .attr("y", j*20 + 25)
+      // .attr("y", function(d, i) { 
+      //   if (isEven(i)) { return (j+1)*20 + 25; }
+      //   else { return (j-1)*20 + 25; }
+      // })
       .attr("x",function(d, i) { return xScale(d[0]); })
       .attr("class","value")
-      .text(function(d){ return (d[1]==0 ? '' : d[1]); })
+      .text(function(d) { return val_formatter(d[1]); })
       .style("fill", function(d) { return c(j); })
-      .style("display","none");
+      .style("display", "none");
 
     g.append("text")
       .attr("text-anchor", "end")
@@ -139,8 +143,8 @@ d3.json("../data/web_data_cp.json", function(data) {
     g.append("text")
       .attr("y", j*20+25)
       .attr("x", species_start) // used to be 20
-      .attr("class","label")
-      .text(truncate(data[j]['name'],30,"..."))
+      .attr("class", "label")
+      .text(truncate(data[j]['name'], 30, "..."))
       .style("fill", function(d) { return c(j); });
 
 // this is only for mouseover interaction
@@ -157,14 +161,37 @@ d3.json("../data/web_data_cp.json", function(data) {
 
   function mouseover(p) {
     var g = d3.select(this).node().parentNode;
+    // d3.select(g.nextSibling).selectAll("circle").style("display","none");
+    // d3.select(g.previousSibling).selectAll("circle").style("display","none");
     d3.select(g).selectAll("circle").style("display","none");
     d3.select(g).selectAll("text.value").style("display","block");
   }
 
   function mouseout(p) {
     var g = d3.select(this).node().parentNode;
+    // d3.select(g.nextSibling).selectAll("circle").style("display","block");
+    // d3.select(g.previousSibling).selectAll("circle").style("display","block");
     d3.select(g).selectAll("circle").style("display","block");
     d3.select(g).selectAll("text.value").style("display","none");
+  }
+
+  function isEven(value) {
+    return (value%2 == 0);
+  }
+
+
+  function val_formatter(val) {
+    if (val == 'CP') { return 'CP'; }
+    else if (val == 0) { return ''; }
+    else if (val < 100) { return val; }
+    else if (val < 1000) { 
+      var rounded_val = d3.round(val/100.);
+      return  rounded_val + 'h'; 
+    }
+    else {
+      var rounded_val = d3.round(val/1000.);
+      return  rounded_val + 'k';   
+    }
   }
 
 });
