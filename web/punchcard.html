@@ -28,7 +28,7 @@ function truncate(str, maxLength, suffix) {
   return str;
 }
 
-var margin = {top: 40, right: 200, bottom: 0, left: 20},
+var margin = {top: 40, right: 250, bottom: 0, left: 20},
   width = 1000,
   height = 3000;
 
@@ -64,7 +64,7 @@ var svg = d3.select(".div-body").append("svg")
   .append("g")
   .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-d3.json("../data/web_data.json", function(data) {
+d3.json("../data/web_data_cp.json", function(data) {
 
   x.domain([start_year, end_year]);
   var xScale = d3.scale.linear()
@@ -115,12 +115,13 @@ d3.json("../data/web_data.json", function(data) {
     circles
       .attr("cx", function(d, i) { return xScale(d[0]); })
       .attr("cy", j*20+20)
-      .attr("r", function(d) { return rScale(d[1]); })
+      .attr("r", function(d) { return rScale( (d[1]=='CP' ? 1 : d[1]) ); })
       .style("fill", function(d) { return c(j); });
 
     text
+      .attr("text-anchor", "middle")
       .attr("y", j*20+25)
-      .attr("x",function(d, i) { return xScale(d[0])-5; })
+      .attr("x",function(d, i) { return xScale(d[0]); })
       .attr("class","value")
       .text(function(d){ return (d[1]==0 ? '' : d[1]); })
       .style("fill", function(d) { return c(j); })
