@@ -9,12 +9,15 @@ body{font-family: Arial, sans-serif;font-size:10px;}
 g.species.active{cursor:pointer;}
 text.label{font-size:12px;font-weight:bold;cursor:pointer;}
 text.column{font-size:12px;font-weight:bold;}
-text.value{font-size:10px;font-weight:bold;}
-.div-header{position: fixed; background-color: white; margin-top: 0px;}
+text.value{font-size:11px;font-weight:bold;}
+.div-header{position: fixed; background-color: white;   }
+.main{ width: 1360px; margin:0px auto;}
 </style>
 <body>
-  <div class="div-header"></div>
-  <div class="div-body"></div>
+  <div class="main">
+    <div class="div-header"></div>
+    <div class="div-body"></div>
+  </div>
 </body>
 <script src="d3.v3.min.js"></script>
 <script>
@@ -28,8 +31,8 @@ function truncate(str, maxLength, suffix) {
   return str;
 }
 
-var margin = {top: 40, right: 250, bottom: 0, left: 20},
-  width = 1000,
+var margin = {top: 40, right: 250, bottom: 0, left: 10},
+  width = 1100,
   height = 3000;
 
 var start_year = 1952,
@@ -109,7 +112,7 @@ d3.json("../data/web_data_cp.json", function(data) {
       .append("text");
 
     var rScale = d3.scale.pow().exponent(.5) // changed from .linear() which is wrong!!! the circle's area should map linearly to # of observations, not the radius!!!
-      .domain([0, d3.max(data[j]['observations'], function(d) { return d[1]; })])
+      .domain([0, 3000])//d3.max(data[j]['observations'], function(d) { return d[1]; })])
       .range([0, 9]);
 
     circles
