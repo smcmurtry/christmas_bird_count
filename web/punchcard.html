@@ -26,7 +26,7 @@ input{margin-left: 50px;}
         <div>
         <input type="radio" value="1" name="rad" checked>
         <div class="button-desc">
-          The area of the largest circle for each species represents the highest count for that species.
+          The area of the largest circle represents the highest count for that species.
           This allows comparison between years for each species individually.
         </div>
         </div>
@@ -39,7 +39,7 @@ input{margin-left: 50px;}
           This allows comparison between species. </div>
         </div>
         <br><br>
-        <div>1h = 100 observations --------- 1k = 1,000 observations -------- CP = observed during count period</div>
+        <div>1h = 100 observations --------------- 1k = 1,000 observations --------------- CP = observed during count period</div>
       </div>
     </div>
     <div class="div-body"></div>
@@ -59,7 +59,7 @@ function truncate(str, maxLength, suffix) {
 
 var margin = {top: 40, right: 250, bottom: 0, left: 10},
   width = 1100,
-  height = 3000;
+  height = 2600;
 
 var start_year = 1952,
   end_year = 2014;
@@ -134,8 +134,7 @@ d3.json("../data/web_data_cp.json", function(data) {
 
   d3.selectAll("input").on("change", 
     function() { 
-      console.log(this.value)// === "count"
-      draw_rows(this.value); }//console.log("change") }
+      draw_rows(this.value); }
     )
 
   function mouseover(p) {
