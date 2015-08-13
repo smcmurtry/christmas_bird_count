@@ -3,19 +3,30 @@
 
 <style>
 
-body{font-family: Arial, sans-serif;font-size:10px;}
+body{font-family: Arial, sans-serif;font-size:10px; margin-top: 0px;}
 .axis path,.axis line {fill: none;stroke:#b6b6b6;shape-rendering: crispEdges;}
 .tick text{fill:#999;}
 g.species.active{cursor:pointer;}
-text.label{font-size:12px;font-weight:bold;cursor:pointer;}
-text.column{font-size:12px;font-weight:bold;}
+text.label{font-size:12px;font-weight:bold;}
+text.column, .legend{font-size:12px;font-weight:bold;}
 text.value{font-size:11px;font-weight:bold;}
 .div-header{position: fixed; background-color: white;   }
 .main{ width: 1360px; margin:0px auto;}
+.legend{text-align: center;}
 </style>
 <body>
   <div class="main">
-    <div class="div-header"></div>
+    <div class="div-header">
+      <div class="legend">  
+        <p>Circle size represents the number of observations in a given year. Mouse over any row to see the counts.</p>
+        <p>Circle size can be changed between two options:</p>
+        <p>1) Where the largest circle represents the highest count for any species for any year. 
+          This allows comparison between species.</p>
+        <p>or 2) Where the largest circle on any species represents the highest count for that species for any year.
+          This allows comparison between years for each species individually.</p>
+        <p>1h = 100 observations | 1k = 1,000 observations | CP = observed in count period but not during official count</p>
+      </div>
+    </div>
     <div class="div-body"></div>
   </div>
 </body>
@@ -85,10 +96,17 @@ d3.json("../data/web_data_cp.json", function(data) {
   header   
     .append("text")
     .attr("text-anchor", "end")
-    .attr("y", 0)
+    .attr("y", -15)
     .attr("x", record_end) // used to be 20
     .attr("class", "label")
     .text('Record');
+  header   
+    .append("text")
+    .attr("text-anchor", "end")
+    .attr("y", 0)
+    .attr("x", record_end) // used to be 20
+    .attr("class", "label")
+    .text('Count');
   
   header
     .append("text")
@@ -187,7 +205,7 @@ d3.json("../data/web_data_cp.json", function(data) {
     if (val == 'CP') { return 'CP'; }
     else if (val == 0) { return ''; }
     else if (val < 100) { return val; }
-    else if (val < 1000) { 
+    else if (val < 950) { 
       var rounded_val = d3.round(val/100.);
       return  rounded_val + 'h'; 
     }
