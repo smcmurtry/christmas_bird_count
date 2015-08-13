@@ -3,7 +3,7 @@
 
 <style>
 
-body{font-family: Arial, sans-serif;font-size:10px; margin-top: 0px;}
+body{font-family: Helvetica, sans-serif;font-size:10px; margin-top: 0px;}
 .axis path,.axis line {fill: none;stroke:#b6b6b6;shape-rendering: crispEdges;}
 .tick text{fill:#999;}
 g.species.active{cursor:pointer;}
@@ -12,19 +12,34 @@ text.column, .legend{font-size:12px;font-weight:bold;}
 text.value{font-size:11px;font-weight:bold;}
 .div-header{position: fixed; background-color: white;   }
 .main{ width: 1360px; margin:0px auto;}
-.legend{text-align: center;}
+.legend{width: 600px; margin:0px auto;}
+.button-desc {float: right; width: 520px;}
+input{margin-left: 50px;}
+
 </style>
 <body>
   <div class="main">
     <div class="div-header">
       <div class="legend">  
-        <p>Circle size represents the number of observations in a given year. Mouse over any row to see the counts.</p>
-        <p>Circle size can be changed between two options:</p>
-        <p>1) Where the largest circle represents the highest count for any species for any year. 
-          This allows comparison between species.</p>
-        <p>or 2) Where the largest circle on any species represents the highest count for that species for any year.
-          This allows comparison between years for each species individually.</p>
-        <p>1h = 100 observations | 1k = 1,000 observations | CP = observed in count period but not during official count</p>
+        <p>Circle size represents the number of observations in a given year. Move the mouse over any row to see the counts.</p>
+        <p>Circle size can scaled in two ways:</p>
+        <div>
+        <input type="radio" value="1" name="rad" checked>
+        <div class="button-desc">
+          The area of the largest circle for each species represents the highest count for that species.
+          This allows comparison between years for each species individually.
+        </div>
+        </div>
+        <br><br>
+
+        <div>
+        <input type="radio" value="2" name="rad">
+        <div class="button-desc">
+          The area of the largest circle represents the highest count for any species. 
+          This allows comparison between species. </div>
+        </div>
+        <br><br>
+        <div>1h = 100 observations --------- 1k = 1,000 observations -------- CP = observed during count period</div>
       </div>
     </div>
     <div class="div-body"></div>
@@ -115,105 +130,103 @@ d3.json("../data/web_data_cp.json", function(data) {
     .attr("class", "label")
     .text("Species");
 
-  for (var j = 0; j < data.length; j++) {
-    var g = svg.append("g")
-      .attr("class","species"); // changed from journal
+  draw_rows(1);
 
-    var circles = g.selectAll("circle")
-      .data(data[j]['observations']) // changed from articles
-      .enter()
-      .append("circle");
-
-    var text = g.selectAll("text")
-      .data(data[j]['observations'])
-      .enter()
-      .append("text");
-
-    var rScale = d3.scale.pow().exponent(.5) // changed from .linear() which is wrong!!! the circle's area should map linearly to # of observations, not the radius!!!
-      .domain([0, 3000])//d3.max(data[j]['observations'], function(d) { return d[1]; })])
-      .range([0, 9]);
-
-    circles
-      .attr("cx", function(d, i) { return xScale(d[0]); })
-      .attr("cy", j*20+20)
-      .attr("r", function(d) { return rScale( (d[1]=='CP' ? 1 : d[1]) ); })
-      .style("fill", function(d) { return c(j); });
-
-    text
-      .attr("text-anchor", "middle")
-      .attr("y", j*20 + 25)
-      // .attr("y", function(d, i) { 
-      //   if (isEven(i)) { return (j+1)*20 + 25; }
-      //   else { return (j-1)*20 + 25; }
-      // })
-      .attr("x",function(d, i) { return xScale(d[0]); })
-      .attr("class","value")
-      .text(function(d) { return val_formatter(d[1]); })
-      .style("fill", function(d) { return c(j); })
-      .style("display", "none");
-
-    g.append("text")
-      .attr("text-anchor", "end")
-      .attr("y", j*20+25)
-      .attr("x", record_end) // used to be 20
-      .attr("class", "column")
-      .text(data[j]['max_count']) //format here
-      .style("fill", function(d) { return c(j); });
-
-
-    g.append("text")
-      .attr("y", j*20+25)
-      .attr("x", species_start) // used to be 20
-      .attr("class", "label")
-      .text(truncate(data[j]['name'], 30, "..."))
-      .style("fill", function(d) { return c(j); });
-
-// this is only for mouseover interaction
-    g.append("rect")
-      .attr("x", 0)
-      .attr("y", j*20+10)
-      .attr("width", width + margin.left + margin.right)
-      .attr("height", 20)
-      .attr("opacity", 0)
-      .on("mouseover", mouseover)
-      .on("mouseout", mouseout);
-
-  };
+  d3.selectAll("input").on("change", 
+    function() { 
+      console.log(this.value)// === "count"
+      draw_rows(this.value); }//console.log("change") }
+    )
 
   function mouseover(p) {
     var g = d3.select(this).node().parentNode;
-    // d3.select(g.nextSibling).selectAll("circle").style("display","none");
-    // d3.select(g.previousSibling).selectAll("circle").style("display","none");
     d3.select(g).selectAll("circle").style("display","none");
     d3.select(g).selectAll("text.value").style("display","block");
   }
 
   function mouseout(p) {
     var g = d3.select(this).node().parentNode;
-    // d3.select(g.nextSibling).selectAll("circle").style("display","block");
-    // d3.select(g.previousSibling).selectAll("circle").style("display","block");
     d3.select(g).selectAll("circle").style("display","block");
     d3.select(g).selectAll("text.value").style("display","none");
   }
-
-  function isEven(value) {
-    return (value%2 == 0);
-  }
-
 
   function val_formatter(val) {
     if (val == 'CP') { return 'CP'; }
     else if (val == 0) { return ''; }
     else if (val < 100) { return val; }
-    else if (val < 950) { 
-      var rounded_val = d3.round(val/100.);
-      return  rounded_val + 'h'; 
-    }
-    else {
-      var rounded_val = d3.round(val/1000.);
-      return  rounded_val + 'k';   
-    }
+    else if (val < 950) { return d3.round(val/100.) + 'h'; }
+    else { return d3.round(val/1000.) + 'k'; }
   }
+
+  function draw_rows(value) {
+
+    var rScale = d3.scale.pow().exponent(.5) // changed from .linear() which is wrong!!! the circle's area should map linearly to # of observations, not the radius!!!
+      .range([0, 9]);
+    svg.selectAll("g").remove();
+
+    for (var j = 0; j < data.length; j++) {
+      var g = svg.append("g")
+        .attr("class","species"); // changed from journal
+
+      var circles = g.selectAll("circle")
+        .data(data[j]['observations']) // changed from articles
+        .enter()
+        .append("circle");
+
+      var text = g.selectAll("text")
+        .data(data[j]['observations'])
+        .enter()
+        .append("text");
+
+      if (value == 1) {
+        rScale.domain([0, d3.max(data[j]['observations'], function(d) { return d[1]; })]);
+      } else {
+        rScale.domain([0, 3000]);
+      }
+
+      circles
+        .attr("cx", function(d, i) { return xScale(d[0]); })
+        .attr("cy", j*20+20)
+        .attr("r", function(d) { return rScale( (d[1]=='CP' ? 1 : d[1]) ); })
+        .style("fill", function(d) { return c(j); });
+
+      text
+        .attr("text-anchor", "middle")
+        .attr("y", j*20 + 25)
+        .attr("x",function(d, i) { return xScale(d[0]); })
+        .attr("class","value")
+        .text(function(d) { return val_formatter(d[1]); })
+        .style("fill", function(d) { return c(j); })
+        .style("display", "none");
+
+      g.append("text")
+        .attr("text-anchor", "end")
+        .attr("y", j*20+25)
+        .attr("x", record_end) // used to be 20
+        .attr("class", "column")
+        .text(data[j]['max_count']) //format here
+        .style("fill", function(d) { return c(j); });
+
+
+      g.append("text")
+        .attr("y", j*20+25)
+        .attr("x", species_start) // used to be 20
+        .attr("class", "label")
+        .text(truncate(data[j]['name'], 30, "..."))
+        .style("fill", function(d) { return c(j); });
+
+  // this is only for mouseover interaction
+      g.append("rect")
+        .attr("x", 0)
+        .attr("y", j*20+10)
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", 20)
+        .attr("opacity", 0)
+        .on("mouseover", mouseover)
+        .on("mouseout", mouseout);
+    }
+
+  };
 
 });
 </script>
