@@ -67,7 +67,7 @@ xAxis.tickFormat(formatYears);
 
 var svg_header =  d3.select(".div-header").append("svg")
   .attr("width", width + margin.left + margin.right)
-  // .attr("height", margin.top)
+  .attr("height", 40)
   .style("margin-left", margin.left + "px")
   .append("g")
   .attr("transform", "translate(" + margin.left + "," + 37 + ")");
@@ -125,8 +125,8 @@ d3.json(data_path + "web_data_cp.json", function(data) {
 
   function mouseover(p) {
     var g = d3.select(this).node().parentNode;
-    d3.select(g).selectAll("circle").style("display","none");
-    d3.select(g).selectAll("text.value").style("display","block");
+    d3.select(g).selectAll("circle").style("display", "none");
+    d3.select(g).selectAll("text.value").style("display", "block");
   }
 
   function mouseout(p) {
@@ -173,13 +173,17 @@ d3.json(data_path + "web_data_cp.json", function(data) {
         .attr("cx", function(d, i) { return xScale(d[0]); })
         .attr("cy", j*20+20)
         .attr("r", function(d) { return rScale( (d[1]=='CP' ? 1 : d[1]) ); })
-        .style("fill", "black"); //function(d) { return c(j); });
+        .attr("fill", function(d) {
+          if (d[1] == data[j]['max_count']) { return "green"; }
+          return "grey";
+        })
+        // .style("fill", "black"); //function(d) { return c(j); });
 
       text
         .attr("text-anchor", "middle")
         .attr("y", j*20 + 25)
-        .attr("x",function(d, i) { return xScale(d[0]); })
-        .attr("class","value")
+        .attr("x", function(d, i) { return xScale(d[0]); })
+        .attr("class", "value")
         .text(function(d) { return val_formatter(d[1]); })
         .style("fill", "black") //function(d) { return c(j); })
         .style("display", "none");
@@ -190,7 +194,7 @@ d3.json(data_path + "web_data_cp.json", function(data) {
         .attr("x", record_end) // used to be 20
         .attr("class", "column")
         .text(data[j]['max_count']) //format here
-        .style("fill", "black"); //function(d) { return c(j); });
+        .style("fill", "green"); //function(d) { return c(j); });
 
 
       g.append("text")

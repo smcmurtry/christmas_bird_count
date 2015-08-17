@@ -31,11 +31,11 @@ text.value {
 .div-header {
   position: fixed;
   background-color: white;
-  height: 287px;
+  height: 270px;
 }
 
 .div-body svg {
-  margin-top: 287px;
+  margin-top: 270px;
 }
 
 .main {
@@ -55,4 +55,8 @@ text.value {
 
 input {
   margin-left: 50px;
+}
+
+.circle .max {
+  fill: blue;
 }
