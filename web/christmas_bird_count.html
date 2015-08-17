@@ -43,7 +43,7 @@ function truncate(str, maxLength, suffix) {
   return str;
 }
 
-var margin = {top: 40, right: 210, bottom: 0, left: 10},
+var margin = {top: 0, right: 210, bottom: 0, left: 10},
   width = 1100,
   height = 2600;
 
@@ -67,7 +67,7 @@ xAxis.tickFormat(formatYears);
 
 var svg_header =  d3.select(".div-header").append("svg")
   .attr("width", width + margin.left + margin.right)
-  .attr("height", margin.top)
+  // .attr("height", margin.top)
   .style("margin-left", margin.left + "px")
   .append("g")
   .attr("transform", "translate(" + margin.left + "," + 37 + ")");
@@ -173,7 +173,7 @@ d3.json(data_path + "web_data_cp.json", function(data) {
         .attr("cx", function(d, i) { return xScale(d[0]); })
         .attr("cy", j*20+20)
         .attr("r", function(d) { return rScale( (d[1]=='CP' ? 1 : d[1]) ); })
-        .style("fill", function(d) { return c(j); });
+        .style("fill", "black"); //function(d) { return c(j); });
 
       text
         .attr("text-anchor", "middle")
@@ -181,7 +181,7 @@ d3.json(data_path + "web_data_cp.json", function(data) {
         .attr("x",function(d, i) { return xScale(d[0]); })
         .attr("class","value")
         .text(function(d) { return val_formatter(d[1]); })
-        .style("fill", function(d) { return c(j); })
+        .style("fill", "black") //function(d) { return c(j); })
         .style("display", "none");
 
       g.append("text")
@@ -190,7 +190,7 @@ d3.json(data_path + "web_data_cp.json", function(data) {
         .attr("x", record_end) // used to be 20
         .attr("class", "column")
         .text(data[j]['max_count']) //format here
-        .style("fill", function(d) { return c(j); });
+        .style("fill", "black"); //function(d) { return c(j); });
 
 
       g.append("text")
@@ -198,7 +198,7 @@ d3.json(data_path + "web_data_cp.json", function(data) {
         .attr("x", species_start) // used to be 20
         .attr("class", "label")
         .text(truncate(data[j]['name'], 30, "..."))
-        .style("fill", function(d) { return c(j); });
+        .style("fill", "black"); //function(d) { return c(j); });
 
   // this is only for mouseover interaction
       g.append("rect")

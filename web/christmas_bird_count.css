@@ -1,6 +1,6 @@
 body {
   font-family: Helvetica, sans-serif;
-  font-size:10px;
+  font-size:12px;
   margin-top: 0px;
 }
 
@@ -19,7 +19,7 @@ g.species.active {
 }
 
 text.label, text.column, .legend {
-  font-size:12px;
+  font-size:14px;
   font-weight:bold;
 }
 
@@ -31,6 +31,11 @@ text.value {
 .div-header {
   position: fixed;
   background-color: white;
+  height: 287px;
+}
+
+.div-body svg {
+  margin-top: 287px;
 }
 
 .main {
