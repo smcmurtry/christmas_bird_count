@@ -34,11 +34,11 @@ text.value {
 .div-header {
   position: fixed;
   background-color: white;
-  height: 270px;
+  height: 200px;
 }
 
 .div-body svg {
-  margin-top: 270px;
+  margin-top: 200px;
 }
 
 .main {
