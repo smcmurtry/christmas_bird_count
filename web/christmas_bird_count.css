@@ -22,7 +22,7 @@ g.species.active {
   font-weight:bold;
 }
 
-text.label, text.column, .legend {
+text.label, text.column, .legend, .button-label {
   font-size:14px;
 }
 
@@ -56,10 +56,21 @@ text.value {
   width: 520px;
 }
 
-input {
+/*input {
   margin-left: 50px;
-}
+}*/
 
 .circle .max {
   fill: blue;
+}
+
+.button-container {
+  position: absolute;
+  text-align: left;
+  width:200px;
+  height: 50px;
+}
+
+.button-container input { 
+  float: left; 
 }
