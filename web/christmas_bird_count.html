@@ -34,54 +34,43 @@
 
 var data_path = '../data/'; //dir_christmas_bird_count/
 
-function truncate(str, maxLength, suffix) {
-  if(str.length > maxLength) {
-    str = str.substring(0, maxLength + 1); 
-    str = str.substring(0, Math.min(str.length, str.lastIndexOf(" ")));
-    str = str + suffix;
-  }
-  return str;
-}
-
-var margin = {top: 0, right: 210, bottom: 0, left: 10},
+var margin_t = {top: 0, right: 210, bottom: 0, left: 10}, // table
+  margin_a = {top: 0, right: 210, bottom: 3, left: 10}, // axis
+  margin_h = {top: 0, right: 210, bottom: 0, left: 10}, // histogram
   width = 500, // 1100
-  height = 2600;
+  height_t = 2600,
+  height_a = 40,
+  height_h = 100
+  row_h = 20,
+  circle_max_size = 5, //9;
+  start_year = 1952,
+  end_year = 2014,
+  record_end = width + 50,
+  species_start = width + 60;
 
-var row_h = 20,
-    circle_max_size = 5, //9;
-    year_col_w;
+var year_col_w;
 
 var window_width = window.innerWidth;
-
-var start_year = 1952,
-  end_year = 2014;
-
-var record_end = width + 50,
-    species_start = width + 60;
 
 var x = d3.scale.linear()
   .range([0, width]);
 
+var formatYears = d3.format("0000");
+
 var xAxis = d3.svg.axis()
   .scale(x)
-  .orient("top");
+  .orient("top")
+  .tickFormat(formatYears);
 
-var formatYears = d3.format("0000");
-xAxis.tickFormat(formatYears);
+var svg_hist = create_svg(".div-header", margin_h, width, height_h)
+var svg_header = create_svg(".div-header", margin_a, width, height_a)
+var svg = create_svg(".div-body", margin_t, width, height_t)
 
-var svg_header =  d3.select(".div-header").append("svg")
-  .attr("width", width + margin.left + margin.right)
-  .attr("height", 40)
-  .style("margin-left", margin.left + "px")
-  .append("g")
-  .attr("transform", "translate(" + margin.left + "," + 37 + ")");
+// var g_hist = svg_hist.append("g")
+//   .att
 
-var svg = d3.select(".div-body").append("svg")
-  .attr("width", width + margin.left + margin.right)
-  .attr("height", height + margin.bottom)
-  .style("margin-left", margin.left + "px")
-  .append("g")
-  .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+var g_main = svg.append("g")
+  .attr("transform", "translate(" + margin_t.left + "," + margin_t.top + ")");
 
 d3.json(data_path + "web_data_cp.json", function(data) {
 
@@ -95,16 +84,17 @@ d3.json(data_path + "web_data_cp.json", function(data) {
 
   svg_header.append("g")
     .attr("class", "x axis")
-    .attr("transform", "translate(0," + 0 + ")")
+    .attr("transform", "translate(" + margin_a.left + "," + (height_a-margin_a.bottom) + ")")
     .call(xAxis);
 
   var header = svg_header.append("g")
-    .attr("class", "header");
+    .attr("class", "header")
+    .attr("transform", "translate(" + margin_a.left + "," + (height_a-margin_a.bottom) + ")");
 
   header.append("text")
     .attr("text-anchor", "end")
     .attr("y", -15)
-    .attr("x", record_end) 
+    .attr("x", record_end)
     .attr("class", "label")
     .text('Max');
 
@@ -152,19 +142,6 @@ d3.json(data_path + "web_data_cp.json", function(data) {
         return "grey";
       })
     d3.select(g).selectAll("text.value").style("display","none");
-  }
-
-  function val_formatter(val) {
-    if (val == 'CP') { return 'CP'; }
-    else if (val == 0) { return ''; }
-    else if (val < 100) { return val; }
-    else if (val < 950) { return d3.round(val/100.) + 'h'; }
-    else { return d3.round(val/1000.) + 'k'; }
-  }
-
-  function val_formatter_2(val) {
-    if (val == 0) { return ''; }
-    else { return val; }
   }
 
   function draw_rows(value) {
@@ -235,4 +212,27 @@ d3.json(data_path + "web_data_cp.json", function(data) {
     }
   };
 });
+
+function val_formatter_2(val) {
+  if (val == 0) { return ''; }
+  else { return val; }
+}
+
+function create_svg(id, margin, w, h) {
+  return d3.select(id).append("svg")
+         .attr("width", w + margin.left + margin.right)
+         .attr("height", h + margin.top + margin.bottom)
+         .append("g")
+         .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+}
+
+function truncate(str, maxLength, suffix) {
+  if(str.length > maxLength) {
+    str = str.substring(0, maxLength + 1); 
+    str = str.substring(0, Math.min(str.length, str.lastIndexOf(" ")));
+    str = str + suffix;
+  }
+  return str;
+}
+
 </script>
