@@ -34,13 +34,13 @@
 
 var data_path = '../data/'; //dir_christmas_bird_count/
 
-var margin_t = {top: 0, right: 210, bottom: 0, left: 10}, // table
-  margin_a = {top: 0, right: 210, bottom: 3, left: 10}, // axis
+var margin_t = {top: 3, right: 210, bottom: 0, left: 10}, // table
+  margin_a = {top: 37, right: 210, bottom: 0, left: 10}, // axis
   margin_h = {top: 0, right: 210, bottom: 0, left: 10}, // histogram
-  width = 500, // 1100
-  height_t = 2600,
-  height_a = 40,
-  height_h = 100
+  width = 720 - margin_t.right - margin_t.left, // 1100
+  height_t = 2600 - margin_t.top - margin_t.bottom,
+  height_a = 40 - margin_a.top - margin_a.bottom,
+  height_h = 100 - margin_h.top - margin_h.top,
   row_h = 20,
   circle_max_size = 5, //9;
   start_year = 1952,
@@ -66,12 +66,6 @@ var svg_hist = create_svg(".div-header", margin_h, width, height_h)
 var svg_header = create_svg(".div-header", margin_a, width, height_a)
 var svg = create_svg(".div-body", margin_t, width, height_t)
 
-// var g_hist = svg_hist.append("g")
-//   .att
-
-var g_main = svg.append("g")
-  .attr("transform", "translate(" + margin_t.left + "," + margin_t.top + ")");
-
 d3.json(data_path + "web_data_cp.json", function(data) {
 
   x.domain([start_year, end_year]);
@@ -84,12 +78,9 @@ d3.json(data_path + "web_data_cp.json", function(data) {
 
   svg_header.append("g")
     .attr("class", "x axis")
-    .attr("transform", "translate(" + margin_a.left + "," + (height_a-margin_a.bottom) + ")")
     .call(xAxis);
 
-  var header = svg_header.append("g")
-    .attr("class", "header")
-    .attr("transform", "translate(" + margin_a.left + "," + (height_a-margin_a.bottom) + ")");
+  var header = svg_header.append("g").attr("class", "header");
 
   header.append("text")
     .attr("text-anchor", "end")
@@ -220,14 +211,14 @@ function val_formatter_2(val) {
 
 function create_svg(id, margin, w, h) {
   return d3.select(id).append("svg")
-         .attr("width", w + margin.left + margin.right)
-         .attr("height", h + margin.top + margin.bottom)
-         .append("g")
-         .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+           .attr("width", w + margin.left + margin.right)
+           .attr("height", h + margin.top + margin.bottom)
+           .append("g")
+           .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 }
 
 function truncate(str, maxLength, suffix) {
-  if(str.length > maxLength) {
+  if (str.length > maxLength) {
     str = str.substring(0, maxLength + 1); 
     str = str.substring(0, Math.min(str.length, str.lastIndexOf(" ")));
     str = str + suffix;
