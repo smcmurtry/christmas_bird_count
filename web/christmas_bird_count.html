@@ -47,7 +47,7 @@ var margin = {top: 0, right: 210, bottom: 0, left: 10},
   width = 500, // 1100
   height = 2600;
 
-var row_h = 30,
+var row_h = 20,
     circle_max_size = 5, //9;
     year_col_w;
 
@@ -93,7 +93,6 @@ d3.json(data_path + "web_data_cp.json", function(data) {
     .range([0, width]);
 
   year_col_w = xScale(2001) - xScale(2000);
-  console.log(year_col_w); 
 
   svg_header.append("g")
     .attr("class", "x axis")
@@ -138,9 +137,44 @@ d3.json(data_path + "web_data_cp.json", function(data) {
     d3.select(g).selectAll("text.value").style("display", "block");
   }
 
+  function mouseover_2(p) {
+    
+    var year = d3.select(this).data()[0][0];
+    var g = d3.select(this).node().parentNode;
+
+    d3.select(g)
+      .selectAll("circle")
+      .filter(function(d) { return d[0] == year; })
+      // .style("display", "none");
+      .attr("fill", "red")
+
+    d3.select(g)
+      .selectAll("text.value")
+      .filter(function(d) { return d[0] == year; })
+      .style("display", "block");
+  }
+
   function mouseout(p) {
     var g = d3.select(this).node().parentNode;
-    d3.select(g).selectAll("circle").style("display","block");
+    d3.select(g)
+      .selectAll("circle")
+      // .style("display","block");
+      .attr("fill", function(d) {
+        if (d[1] == data[j]['max_count']) { return "green"; }
+        return "grey";
+      })
+    d3.select(g).selectAll("text.value").style("display","none");
+  }
+
+  function mouseout_2(p) {
+    var g = d3.select(this).node().parentNode;
+    d3.select(g)
+      .selectAll("circle")
+      // .style("display","block");
+      .attr("fill", function(d) {
+        if (d[1] == d[2]) { return "green"; }
+        return "grey";
+      })
     d3.select(g).selectAll("text.value").style("display","none");
   }
 
@@ -150,6 +184,11 @@ d3.json(data_path + "web_data_cp.json", function(data) {
     else if (val < 100) { return val; }
     else if (val < 950) { return d3.round(val/100.) + 'h'; }
     else { return d3.round(val/1000.) + 'k'; }
+  }
+
+  function val_formatter_2(val) {
+    if (val == 0) { return ''; }
+    else { return val; }
   }
 
   function draw_rows(value) {
@@ -180,7 +219,7 @@ d3.json(data_path + "web_data_cp.json", function(data) {
 
       circles
         .attr("cx", function(d) { return xScale(d[0]); })
-        .attr("cy", j*row_h+20)
+        .attr("cy", (j+1)*row_h)
         .attr("r", function(d) { return rScale( (d[1]=='CP' ? 1 : d[1]) ); })
         .attr("fill", function(d) {
           if (d[1] == data[j]['max_count']) { return "green"; }
@@ -190,54 +229,52 @@ d3.json(data_path + "web_data_cp.json", function(data) {
 
       text
         .attr("text-anchor", "middle")
-        .attr("y", j*row_h + 25)
+        .attr("y", (j+1)*row_h - circle_max_size - 1)//+ 5)
         .attr("x", function(d) { return xScale(d[0]); })
         .attr("class", "value")
-        .text(function(d) { return val_formatter(d[1]); })
+        .text(function(d) { return val_formatter_2(d[1]); })
         .style("fill", "black") //function(d) { return c(j); })
         .style("display", "none");
 
       g.append("text")
         .attr("text-anchor", "end")
-        .attr("y", j*row_h+25)
-        .attr("x", record_end) // used to be 20
+        .attr("y", (j+1)*row_h + 5)
+        .attr("x", record_end)
         .attr("class", "column")
         .text(data[j]['max_count']) //format here
         .style("fill", "green"); //function(d) { return c(j); });
 
 
       g.append("text")
-        .attr("y", j*row_h+25)
-        .attr("x", species_start) // used to be 20
+        .attr("y", (j+1)*row_h + 5)
+        .attr("x", species_start)
         .attr("class", "label")
         .text(truncate(data[j]['name'], 30, "..."))
         .style("fill", "black"); //function(d) { return c(j); });
 
   // this is only for mouseover interaction
-      g.append("rect")
-        .attr("x", 0)
-        .attr("y", j*row_h+10)
-        .attr("width", width + margin.left + margin.right)
+      // g.append("rect")
+      //   .attr("x", 0)
+      //   .attr("y", j*row_h + row_h/2)
+      //   .attr("width", width + margin.left + margin.right)
+      //   .attr("height", row_h)
+      //   .attr("opacity", 0)
+      //   .on("mouseover", mouseover)
+      //   .on("mouseout", mouseout);
+
+      var rects = g.selectAll("rect")
+        .data(data[j]['observations']) // changed from articles
+        .enter()
+        .append("rect");
+
+      rects
+        .attr("x", function(d) { return xScale(d[0]) - year_col_w/2; })
+        .attr("y", j*row_h+ row_h/2)
+        .attr("width", year_col_w)
         .attr("height", row_h)
         .attr("opacity", 0)
-        .on("mouseover", mouseover)
-        .on("mouseout", mouseout);
-
-      // var rects = g.selectAll("rect")
-      //   .data(data[j]['observations']) // changed from articles
-      //   .enter()
-      //   .append("rect");
-
-      // rects
-      //   .attr("cx", function(d) { return xScale(d[0]); })
-      //   .attr("cy", j*row_h+20)
-      //   .attr("width", asdf)
-      //   .attr("height", asdf)
-      //   // .attr("r", function(d) { return rScale( (d[1]=='CP' ? 1 : d[1]) ); })
-      //   .attr("fill", function(d) {
-      //     if (d[1] == data[j]['max_count']) { return "green"; }
-      //     return "grey";
-      //   })
+        .on("mouseover", mouseover_2)
+        .on("mouseout", mouseout_2)
     }
 
   };
