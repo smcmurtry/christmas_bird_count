@@ -1,6 +1,6 @@
 body {
   font-family: Helvetica, sans-serif;
-  font-size:12px;
+  font-size:14px;
   margin-top: 0px;
 }
 
@@ -18,9 +18,12 @@ g.species.active {
   cursor:pointer;
 }
 
+.legend, .header {
+  font-weight:bold;
+}
+
 text.label, text.column, .legend {
   font-size:14px;
-  font-weight:bold;
 }
 
 text.value {
@@ -39,7 +42,7 @@ text.value {
 }
 
 .main {
-  width: 1330px;
+  /*width: 1330px;*/
   margin:0px auto;
 }
 

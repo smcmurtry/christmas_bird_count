@@ -34,11 +34,6 @@
 
 var data_path = '../data/'; //dir_christmas_bird_count/
 
-d3.select(".div-body")
-  .on("scroll", function(d) {
-    console.log("hi")
-  })
-
 function truncate(str, maxLength, suffix) {
   if(str.length > maxLength) {
     str = str.substring(0, maxLength + 1); 
@@ -49,25 +44,14 @@ function truncate(str, maxLength, suffix) {
 }
 
 var margin = {top: 0, right: 210, bottom: 0, left: 10},
-  width = 1100,
+  width = 500, // 1100
   height = 2600;
 
-d3.select(window)
-  .on("scroll", function(e) {
-    if (window.innerWidth < width + margin.left + margin.right) {
-      var scrollX = d3.select(this).node().scrollX;
-      d3.select(".div-header")
-        .style("left", "-" + scrollX + 'px');
-    } else {
-      d3.select(".div-header")
-        .style("left");
-    }
-});
+var row_h = 30,
+    circle_max_size = 5, //9;
+    year_col_w;
 
-window.onresize = function(event) {
-  d3.select(".div-header")
-    .style("left");
-};
+var window_width = window.innerWidth;
 
 var start_year = 1952,
   end_year = 2014;
@@ -75,7 +59,7 @@ var start_year = 1952,
 var record_end = width + 50,
     species_start = width + 60;
 
-var c = d3.scale.category20c();
+// var c = d3.scale.category20c();
 
 var x = d3.scale.linear()
   .range([0, width]);
@@ -107,6 +91,9 @@ d3.json(data_path + "web_data_cp.json", function(data) {
   var xScale = d3.scale.linear()
     .domain([start_year, end_year])
     .range([0, width]);
+
+  year_col_w = xScale(2001) - xScale(2000);
+  console.log(year_col_w); 
 
   svg_header.append("g")
     .attr("class", "x axis")
@@ -168,15 +155,15 @@ d3.json(data_path + "web_data_cp.json", function(data) {
   function draw_rows(value) {
 
     var rScale = d3.scale.pow().exponent(.5) // changed from .linear() which is wrong!!! the circle's area should map linearly to # of observations, not the radius!!!
-      .range([0, 9]);
+      .range([0, circle_max_size]);
     svg.selectAll("g").remove();
 
     for (var j = 0; j < data.length; j++) {
       var g = svg.append("g")
-        .attr("class","species"); // changed from journal
+        .attr("class","species");
 
       var circles = g.selectAll("circle")
-        .data(data[j]['observations']) // changed from articles
+        .data(data[j]['observations']) 
         .enter()
         .append("circle");
 
@@ -188,23 +175,23 @@ d3.json(data_path + "web_data_cp.json", function(data) {
       if (value == 1) {
         rScale.domain([0, d3.max(data[j]['observations'], function(d) { return d[1]; })]);
       } else {
-        rScale.domain([0, 3000]);
+        rScale.domain([0, 3400]);
       }
 
       circles
-        .attr("cx", function(d, i) { return xScale(d[0]); })
-        .attr("cy", j*20+20)
+        .attr("cx", function(d) { return xScale(d[0]); })
+        .attr("cy", j*row_h+20)
         .attr("r", function(d) { return rScale( (d[1]=='CP' ? 1 : d[1]) ); })
         .attr("fill", function(d) {
           if (d[1] == data[j]['max_count']) { return "green"; }
           return "grey";
         })
-        // .style("fill", "black"); //function(d) { return c(j); });
+        // .style("fill", function(d) { return c(j); });
 
       text
         .attr("text-anchor", "middle")
-        .attr("y", j*20 + 25)
-        .attr("x", function(d, i) { return xScale(d[0]); })
+        .attr("y", j*row_h + 25)
+        .attr("x", function(d) { return xScale(d[0]); })
         .attr("class", "value")
         .text(function(d) { return val_formatter(d[1]); })
         .style("fill", "black") //function(d) { return c(j); })
@@ -212,7 +199,7 @@ d3.json(data_path + "web_data_cp.json", function(data) {
 
       g.append("text")
         .attr("text-anchor", "end")
-        .attr("y", j*20+25)
+        .attr("y", j*row_h+25)
         .attr("x", record_end) // used to be 20
         .attr("class", "column")
         .text(data[j]['max_count']) //format here
@@ -220,7 +207,7 @@ d3.json(data_path + "web_data_cp.json", function(data) {
 
 
       g.append("text")
-        .attr("y", j*20+25)
+        .attr("y", j*row_h+25)
         .attr("x", species_start) // used to be 20
         .attr("class", "label")
         .text(truncate(data[j]['name'], 30, "..."))
@@ -229,12 +216,28 @@ d3.json(data_path + "web_data_cp.json", function(data) {
   // this is only for mouseover interaction
       g.append("rect")
         .attr("x", 0)
-        .attr("y", j*20+10)
+        .attr("y", j*row_h+10)
         .attr("width", width + margin.left + margin.right)
-        .attr("height", 20)
+        .attr("height", row_h)
         .attr("opacity", 0)
         .on("mouseover", mouseover)
         .on("mouseout", mouseout);
+
+      // var rects = g.selectAll("rect")
+      //   .data(data[j]['observations']) // changed from articles
+      //   .enter()
+      //   .append("rect");
+
+      // rects
+      //   .attr("cx", function(d) { return xScale(d[0]); })
+      //   .attr("cy", j*row_h+20)
+      //   .attr("width", asdf)
+      //   .attr("height", asdf)
+      //   // .attr("r", function(d) { return rScale( (d[1]=='CP' ? 1 : d[1]) ); })
+      //   .attr("fill", function(d) {
+      //     if (d[1] == data[j]['max_count']) { return "green"; }
+      //     return "grey";
+      //   })
     }
 
   };
