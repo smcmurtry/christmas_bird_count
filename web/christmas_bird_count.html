@@ -95,26 +95,18 @@ d3.json(data_path + "web_data_cp.json", function(data) {
   })
 
   d3.selectAll(".label").on("click", function() {
-    var sort_index = {'Max':5, 'Median':6, 'Species':7};
+    var sort_prop = {'Max':'max_sort', 'Median':'orig_sort', 'Species':'orig_sort'};
     var text = d3.select(this).text();
-    // d3.selectAll("circle")
-    //   .attr("cy", function(d) { return (sort_index[text]+1)*row_h); })
 
-    // if (text != 'Count') {
-    //   var prop, sorted_data;
-    //   if (text == 'Median') { prop = 'median_count' }
-    //   else if (text == 'Max') { prop = 'max_count' }
-    //   else if (text == 'Species') { prop = 'name'}
-    //   function compareNumbers(a, b) {
-    //     return a[prop] - b[prop];
-    //   }
+    d3.selectAll("circle")
+      .attr("cy", function(d) { return (d[sort_prop[text]]+1)*row_h; });
 
-    //   if (text == 'Species') { sorted_data = data.sort; }
-    //   else { sorted_data = data.sort()}
-    //   console.log(data.sort(compareNumbers))
-      // d3.selectAll("circle")
-      //   .attr()
-    // }
+    d3.selectAll(".mouse_rect")
+      .attr("y", function(d) { return d[sort_prop[text]]*row_h+ row_h/2; });
+
+    d3.select('.div-body').selectAll(".value")
+      .attr("y", function(d) { return (d[sort_prop[text]]+1)*row_h - circle_max_size - 1; });
+    
   })
 
   function mouseover_1(p) {
@@ -131,147 +123,165 @@ d3.json(data_path + "web_data_cp.json", function(data) {
 
   function mouseover_2(p) {
     var year = d3.select(this).data()[0].year;
-    var g = d3.select(this).node().parentNode;
+    var orig_sort = d3.select(this).data()[0].orig_sort;
 
-    d3.select(g)
-      .selectAll("circle")
-      .filter(function(d) { return d.year == year; })
+    d3.selectAll("circle")
+      .filter(function(d) { return d.year == year && d.orig_sort == orig_sort; })
       .attr("fill", "red")
 
-    d3.select(g)
-      .selectAll(".text-rect")
-      .filter(function(d) { return d.year == year; })
+    d3.selectAll(".text-rect")
+      .filter(function(d) { return d.year == year && d.orig_sort == orig_sort; })
       .style("display", "block");
 
-    d3.select(g)
-      .selectAll("text.value")
-      .filter(function(d) { return d.year == year; })
+    d3.selectAll("text.value")
+      .filter(function(d) { return d.year == year && d.orig_sort == orig_sort; })
       .style("display", "block");
   }
 
   function mouseout_1(p) {
-    var g = d3.select(this).node().parentNode;
-    d3.select(this)
-      .attr("fill", "grey");
-
+    d3.select(this).attr("fill", "grey");
     d3.select(".div-header").selectAll("text.value").style("display", "none");
   }
 
   function mouseout_2(p) {
-    var g = d3.select(this).node().parentNode;
-    d3.select(g)
-      .selectAll("circle")
+    d3.selectAll("circle")
       .attr("fill", function(d) {
         if (d.count == d.median) { return "blue"; }
         else if (d.count == d.max) { return "green"; }
         return "grey";
       })
-    d3.select(g).selectAll("text.value").style("display","none");
-    d3.select(g).selectAll(".text-rect").style("display","none");
+    d3.selectAll("text.value").style("display","none");
+    d3.selectAll(".text-rect").style("display","none");
 
+  }
+
+  function compile_data() {
+    var points = [],
+        rows = [];
+
+    for (var j = 0; j < data.length; j++) {
+      
+      var row = {};
+      for (var k = Object.keys(data[j]).length - 1; k >= 0; k--) {
+        var key = Object.keys(data[j])[k];
+        if (key != 'observations') { row[key] = data[j][key]; }
+        row['orig_sort'] = j;
+      };
+      rows.push(row);
+
+      for (var i = 0; i < data[j]['observations'].length; i++) {
+        var point = {'year': data[j]['observations'][i][0],
+                     'count': data[j]['observations'][i][1],
+                     'max': data[j]['max_count'],
+                     'median': data[j]['median_count'],
+                     'max_sort': data[j]['max_sort'],
+                     'orig_sort': j
+                    }
+        points.push(point);
+      }
+    }
+    return [points, rows];
   }
 
   function draw_rows(value) {
 
     var rScale = d3.scale.pow().exponent(.5) // changed from .linear() which is wrong!!! the circle's area should map linearly to # of observations, not the radius!!!
       .range([0, circle_max_size]);
-    svg.selectAll("g").remove();
+    // svg.selectAll("g").remove();
+    var res = compile_data();
+    var points = res[0],
+        rows = res[1];
 
-    for (var j = 0; j < data.length; j++) {
+    svg.selectAll("circle")
+      .data(points)
+      .enter()
+      .append("circle")
+      .attr("cx", function(d) { return x(d.year)})
+      .attr("cy", function(d) { return (d.orig_sort+1)*row_h; })
+      .attr("r", function(d) { 
+        if (value == 1) {
+          rScale.domain([0, d.max]);
+        } else {
+          rScale.domain([0, 3400]);
+        }
+        return rScale( (d.count=='CP' ? 1 : d.count) ); 
+      })
+      .attr("fill", function(d) {
+        if (d.count == d.median) { return "blue"; }
+        else if (d.count == d.max) { return "green"; }
+        return "grey";
+      });
 
-      var row = [];
-      for (var i = 0; i < data[j]['observations'].length; i++) {
-        var point = {'year': data[j]['observations'][i][0],
-                     'count': data[j]['observations'][i][1],
-                     'max': data[j]['max_count'],
-                     'median': data[j]['median_count']
-                    }
-        row.push(point);
-      };
+    svg.selectAll(".text-rect")
+      .data(points)
+      .enter()
+      .append("rect")
+      .attr("class", "text-rect")
+      .attr("y", function(d) { return (d.orig_sort+1)*row_h - circle_max_size - 12; } ) 
+      .attr("x", function(d) { return x(d.year) - year_col_w/2; })
+      .attr("width", function(d) { return (d.count > 0 || d.count == 'CP') ? circle_max_size*2 : 0; })
+      .attr("height", 11)
+      .style("fill", "white")
+      .style("opacity", 0.5)
+      .style("display", "none");
 
-      var g = svg.append("g").attr("class","species");
+    svg.selectAll("value")
+      .data(points)
+      .enter()
+      .append("text")
+      .attr("text-anchor", "middle")
+      .attr("y", function(d) { return (d.orig_sort+1)*row_h - circle_max_size - 1; })
+      .attr("x", function(d) { return x(d.year); })
+      .attr("class", "value")
+      .text(function(d) { return val_formatter_2(d.count); })
+      .style("fill", "black")
+      .style("display", "none");
 
-      if (value == 1) {
-        rScale.domain([0, d3.max(row, function(d) { return d.max; })]);
-      } else {
-        rScale.domain([0, 3400]);
-      }
+    svg.selectAll('.column .max')
+      .data(rows)
+      .enter()
+      .append("text")
+      .attr("class", "column max")
+      .attr("text-anchor", "end")
+      .attr("y", function(d) { return (d.orig_sort+1)*row_h + 5; })
+      .attr("x", record_end)
+      .text(function(d) { return d.max_count; })
+      .style("fill", "green");
 
-      g.selectAll("circle")
-        .data(row)
-        .enter()
-        .append("circle")
-        .attr("cx", function(d) { return x(d.year)})
-        .attr("cy", (j+1)*row_h)
-        .attr("r", function(d) { return rScale( (d.count=='CP' ? 1 : d.count) ); })
-        .attr("fill", function(d) {
-          if (d.count == data[j]['median_count']) { return "blue"; }
-          else if (d.count == data[j]['max_count']) { return "green"; }
-          return "grey";
-        });
+    svg.selectAll('.column .median')
+      .data(rows)
+      .enter()
+      .append("text")
+      .attr("text-anchor", "end")
+      .attr("y", function(d) { return (d.orig_sort+1)*row_h + 5; })
+      .attr("x", record_end+width_max_col)
+      .attr("class", "column median")
+      .text(function(d) { return d.median_count; })
+      .style("fill", "blue");
 
-      g.selectAll(".text-rect")
-        .data(row)
-        .enter()
-        .append("rect")
-        .attr("class", "text-rect")
-        .attr("y", (j+1)*row_h - circle_max_size - 12 )//+ 5)
-        .attr("x", function(d) { return x(d.year) - year_col_w/2; })
-        .attr("width", function(d) { return (d.count > 0 || d.count == 'CP') ? circle_max_size*2 : 0; })
-        .attr("height", 11)
-        .style("fill", "white")
-        .style("opacity", 0.5)
-        .style("display", "none");
+    svg.selectAll('.column .species')
+      .data(rows)
+      .enter()
+      .append("text")
+      .attr("y", function(d) { return (d.orig_sort+1)*row_h + 5; })
+      .attr("x", species_start+width_max_col+col_spacing)
+      .attr("class", "column species")
+      .text(function(d) { return truncate(d.name, 30, "..."); })
+      .style("fill", "grey");
 
-      g.selectAll("text")
-        .data(row)
-        .enter()
-        .append("text")
-        .attr("text-anchor", "middle")
-        .attr("y", (j+1)*row_h - circle_max_size - 1)//+ 5)
-        .attr("x", function(d) { return x(d.year); })
-        .attr("class", "value")
-        .text(function(d) { return val_formatter_2(d.count); })
-        .style("fill", "black")
-        .style("display", "none");
-
-      g.append("text")
-        .attr("text-anchor", "end")
-        .attr("y", (j+1)*row_h + 5)
-        .attr("x", record_end)
-        .attr("class", "column max")
-        .text(data[j]['max_count'])
-        .style("fill", "green");
-
-      g.append("text")
-        .attr("text-anchor", "end")
-        .attr("y", (j+1)*row_h + 5)
-        .attr("x", record_end+width_max_col)
-        .attr("class", "column median")
-        .text(data[j]['median_count'])
-        .style("fill", "blue");
-
-      g.append("text")
-        .attr("y", (j+1)*row_h + 5)
-        .attr("x", species_start+width_max_col+col_spacing)
-        .attr("class", "column species")
-        .text(truncate(data[j]['name'], 30, "..."))
-        .style("fill", "grey");
-
-      g.selectAll(".mouse_rect")
-        .data(row) 
-        .enter()
-        .append("rect")
-        .attr("class", "mouse_rect")
-        .attr("x", function(d) { return x(d.year) - year_col_w/2; })
-        .attr("y", j*row_h+ row_h/2)
-        .attr("width", year_col_w)
-        .attr("height", row_h)
-        .attr("opacity", 0)
-        .on("mouseover", mouseover_2)
-        .on("mouseout", mouseout_2)
-    }
-  };
+    svg.selectAll(".mouse_rect")
+      .data(points) 
+      .enter()
+      .append("rect")
+      .attr("class", "mouse_rect")
+      .attr("x", function(d) { return x(d.year) - year_col_w/2; })
+      .attr("y", function(d) { return d.orig_sort*row_h+ row_h/2; })
+      .attr("width", year_col_w)
+      .attr("height", row_h)
+      .attr("opacity", 0)
+      .on("mouseover", mouseover_2)
+      .on("mouseout", mouseout_2)
+  }
 
   d3.json(data_path + "bar_data.json", function(bar_data) {
 
