@@ -99,6 +99,11 @@ d3.json(data_path + "web_data_cp.json", function(data) {
       .attr("fill", "red")
 
     d3.select(g)
+      .selectAll(".text-rect")
+      .filter(function(d) { return d[0] == year; })
+      .style("display", "block");
+
+        d3.select(g)
       .selectAll("text.value")
       .filter(function(d) { return d[0] == year; })
       .style("display", "block");
@@ -125,6 +130,8 @@ d3.json(data_path + "web_data_cp.json", function(data) {
         return "grey";
       })
     d3.select(g).selectAll("text.value").style("display","none");
+    d3.select(g).selectAll(".text-rect").style("display","none");
+
   }
 
   function mouseout_1(p) {
@@ -162,6 +169,19 @@ d3.json(data_path + "web_data_cp.json", function(data) {
           return "grey";
         });
 
+      g.selectAll(".text-rect")
+        .data(data[j]['observations'])
+        .enter()
+        .append("rect")
+        .attr("class", "text-rect")
+        .attr("y", (j+1)*row_h - circle_max_size - 12 )//+ 5)
+        .attr("x", function(d) { return x(d[0]) - year_col_w/2; })
+        .attr("width", function(d) { return (d[1] > 0 || d[1] == 'CP') ? circle_max_size*2 : 0; })
+        .attr("height", 11)
+        .style("fill", "white")
+        .style("opacity", 0.5)
+        .style("display", "none");
+
       g.selectAll("text")
         .data(data[j]['observations'])
         .enter()
@@ -189,10 +209,11 @@ d3.json(data_path + "web_data_cp.json", function(data) {
         .text(truncate(data[j]['name'], 30, "..."))
         .style("fill", "black");
 
-      g.selectAll("rect")
+      g.selectAll(".mouse_rect")
         .data(data[j]['observations']) 
         .enter()
         .append("rect")
+        .attr("class", "mouse_rect")
         .attr("x", function(d) { return x(d[0]) - year_col_w/2; })
         .attr("y", j*row_h+ row_h/2)
         .attr("width", year_col_w)
