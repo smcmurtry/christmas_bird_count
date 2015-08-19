@@ -20,7 +20,7 @@ g.species.active {
 
 .legend .select {
   float: left;
-  height: 70px;
+  height: 40px;
   margin-right: 20px;
 }
 
@@ -36,10 +36,11 @@ text.value {
 .div-header {
   position: fixed;
   background-color: white;
+  /*height: 260px;*/
 }
 
 .div-body svg {
-  margin-top: 330px;
+  margin-top: 240px;
 }
 
 .main {
@@ -63,7 +64,7 @@ text.value {
 
 .button-desc {
   /*float: right;*/
-  width: 520px;
+  width: 800px;
 }
 
 /*input {
