@@ -74,3 +74,8 @@ text.value {
 .button-container input { 
   float: left; 
 }
+
+.button-container .radio {
+  margin-left: 10px;
+  margin-bottom: 10px;
+}
