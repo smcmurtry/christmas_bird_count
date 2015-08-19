@@ -18,11 +18,13 @@ g.species.active {
   cursor:pointer;
 }
 
-.legend, .header {
-  font-weight:bold;
+.legend .select {
+  float: left;
+  height: 70px;
+  margin-right: 20px;
 }
 
-text.label, text.column, .legend, .button-label {
+text.label, text.column, .button-label {
   font-size:14px;
 }
 
@@ -34,11 +36,10 @@ text.value {
 .div-header {
   position: fixed;
   background-color: white;
-  height: 200px;
 }
 
 .div-body svg {
-  margin-top: 200px;
+  margin-top: 330px;
 }
 
 .main {
@@ -46,13 +47,22 @@ text.value {
   margin:0px auto;
 }
 
-.legend {
+/*.legend {
   width: 600px;
   margin:0px auto;
+}*/
+
+.legend input {
+  float: left;
+  margin-right: 10px;
+}
+
+.a {
+  margin-bottom: 10px;
 }
 
 .button-desc {
-  float: right;
+  /*float: right;*/
   width: 520px;
 }
 
