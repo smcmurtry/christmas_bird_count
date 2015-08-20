@@ -55,8 +55,7 @@ text.column {
 }
 
 .main {
-  /*width: 1330px;*/
-  margin:0px auto;
+  margin: 0px auto;
 }
 
 /*.legend {
@@ -104,4 +103,13 @@ text.column {
 
 .sort {
   cursor: pointer;
+}
+
+.col-header-text {
+  float: left;
+  width: 20px;
+}
+
+.col-header-div {
+  position: 
 }

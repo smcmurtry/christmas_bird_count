@@ -11,10 +11,10 @@
       <div class="legend"> 
         <div class="select">Select the circle scale:</div>
         <div>
-        <div><i class="sort icon" name='Max'>max</i></div>
-        <div><i class="sort icon" name='Median'>median</i></div>
-        <div><i class="sort icon" name='Species'>species</i></div>
-
+       <!--  <div class="col-header-div"><div class="col-header-txt">Max Count</div><i class="sort icon" name='Max'></i></div>
+        <div class="col-header-div"><div class="col-header-txt">Median Count</div><i class="sort icon" name='Median'></i></div>
+        <div class="col-header-div"><div class="col-header-txt">Species</div><i class="sort icon" name='Species'></i></div>
+ -->
           <div class="a">
             <input type="radio" value="1" name="rad" checked>
             <div class="button-desc">
@@ -45,6 +45,8 @@ var window_width;
 if ((window.innerWidth-30) > 1400) { window_width = 1400; }
 else { window_width = window.innerWidth - 30; } // this includes the left margin and vertical scrollbar
 
+d3.select(".main").style("width", window_width + 'px');
+d3.select(".div-header").style("width", window_width + 'px');
 
 var margin_t = {top: 3, right: 260, bottom: 0, left: 10}, // table
   margin_a = {top: 27, right: 260, bottom: 0, left: 10}, // axis
