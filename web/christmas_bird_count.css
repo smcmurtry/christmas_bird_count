@@ -24,7 +24,7 @@ g.species.active {
   margin-right: 20px;
 }
 
-text.column, .button-label {
+text.column, .button-label, .col-header-txt {
   font-size:14px;
 }
 
@@ -32,7 +32,6 @@ text.label {
   font-size: 14px;
   font-weight: bold;
   fill: black;
-  cursor: s-resize;
 }
 
 text.value {
@@ -40,7 +39,7 @@ text.value {
   font-weight:bold;
 }
 
-text.column {
+text.column, .col-header-txt {
   font-weight: bold;
 }
 
@@ -58,11 +57,6 @@ text.column {
   margin: 0px auto;
 }
 
-/*.legend {
-  width: 600px;
-  margin:0px auto;
-}*/
-
 .legend input {
   float: left;
   margin-right: 10px;
@@ -76,10 +70,6 @@ text.column {
   /*float: right;*/
   width: 800px;
 }
-
-/*input {
-  margin-left: 50px;
-}*/
 
 .circle .max {
   fill: blue;
@@ -105,11 +95,22 @@ text.column {
   cursor: pointer;
 }
 
-.col-header-text {
+.col-header-txt {
   float: left;
-  width: 20px;
 }
 
+.ma .col-header-txt {   width: 30px;}
+.me .col-header-txt  { width: 50px;}
+.sp .col-header-txt  { width: 54px;}
+
 .col-header-div {
-  position: 
+  position: absolute;
+    width: 90px;
+
 }
+
+/*.sort {
+  padding-top: 5px;
+}
+
+.sp .sort { padding-top: 0px;}*/

@@ -11,10 +11,10 @@
       <div class="legend"> 
         <div class="select">Select the circle scale:</div>
         <div>
-       <!--  <div class="col-header-div"><div class="col-header-txt">Max Count</div><i class="sort icon" name='Max'></i></div>
-        <div class="col-header-div"><div class="col-header-txt">Median Count</div><i class="sort icon" name='Median'></i></div>
-        <div class="col-header-div"><div class="col-header-txt">Species</div><i class="sort icon" name='Species'></i></div>
- -->
+        <div class="col-header-div ma"><div class="col-header-txt ma">Max</div><i class="sort icon" name='Max'></i></div>
+        <div class="col-header-div me"><div class="col-header-txt me">Median</div><i class="sort icon" name='Median'></i></div>
+        <div class="col-header-div sp"><div class="col-header-txt sp">Species</div><i class="sort icon" name='Species'></i></div>
+
           <div class="a">
             <input type="radio" value="1" name="rad" checked>
             <div class="button-desc">
@@ -48,9 +48,9 @@ else { window_width = window.innerWidth - 30; } // this includes the left margin
 d3.select(".main").style("width", window_width + 'px');
 d3.select(".div-header").style("width", window_width + 'px');
 
-var margin_t = {top: 3, right: 260, bottom: 0, left: 10}, // table
-  margin_a = {top: 27, right: 260, bottom: 0, left: 10}, // axis
-  margin_h = {top: 13, right: 260, bottom: 12, left: 10}, // histogram
+var margin_t = {top: 3, right: 300, bottom: 0, left: 10}, // table
+  margin_a = {top: 27, right: 300, bottom: 0, left: 10}, // axis
+  margin_h = {top: 13, right: 300, bottom: 12, left: 10}, // histogram
   width = window_width - margin_t.right - margin_t.left, // 1100
   height_t = 3000 - margin_t.top - margin_t.bottom,
   height_a = 30 - margin_a.top - margin_a.bottom,
@@ -59,13 +59,16 @@ var margin_t = {top: 3, right: 260, bottom: 0, left: 10}, // table
   circle_max_size = 8,
   start_year = 1952,
   end_year = 2014,
-  record_end = width + 50,
-  species_start = width + 60,
   button_legend_h = 150,
-  width_max_col = 55,
-  width_med_col = 60,
-  col_spacing = 10,
   trans_t = 700,
+  max_col_start = width + 28,
+  max_col_end = width + 60,
+  median_col_start = width + 78,
+  median_col_end = width + 130,
+  species_col_start = width + 150,
+  species_header_offset = 10,
+  col_header_bottom = 233,
+  trunc_chars = 19,
   sort_dict = {'Max': {'ascending': 'max_sort_a', 'descending': 'max_sort_d'},
                'Median': {'ascending': 'median_sort_a', 'descending': 'median_sort_d'},
                'Species': {'ascending': 'species_sort_a', 'descending': 'species_sort_d'}};
@@ -104,11 +107,17 @@ d3.json(data_path + "web_data_cp.json", function(data) {
 
   var header = svg_header.append("g").attr("class", "header");
 
-  add_label(header, record_end, -15, "Max", "end", "label");
-  add_label(header, record_end, 0, "Count", "end", "label");
-  add_label(header, record_end+width_max_col, -15, "Median", "end", "label");
-  add_label(header, record_end+width_max_col, 0, "Count", "end", "label");
-  add_label(header, record_end+width_max_col+col_spacing, 0, "Species", "start", "label");
+  d3.selectAll(".col-header-div").style("top", col_header_bottom + "px");
+
+  d3.selectAll(".ma").style("left", max_col_start + "px");
+  d3.selectAll(".me").style("left", median_col_start + "px");
+  d3.selectAll(".sp").style("left", (species_col_start+species_header_offset) + "px");
+
+  // d3.selectAll(".ma").style("top", col_header_bottom + "px");
+  // d3.selectAll(".me").style("top", col_header_bottom + "px");
+  // d3.selectAll(".sp").style("top", (col_header_bottom+15) + "px");
+
+
 
   draw_rows();
 
@@ -288,7 +297,7 @@ d3.json(data_path + "web_data_cp.json", function(data) {
       .append("text")
       .attr("class", "column max")
       .attr("text-anchor", "end")
-      .attr("x", record_end)
+      .attr("x", max_col_end)
       .text(function(d) { return d.max_count; })
       .style("fill", "green");
 
@@ -297,7 +306,7 @@ d3.json(data_path + "web_data_cp.json", function(data) {
       .enter()
       .append("text")
       .attr("text-anchor", "end")
-      .attr("x", record_end+width_max_col)
+      .attr("x", median_col_end)
       .attr("class", "column median")
       .text(function(d) { return d.median_count; })
       .style("fill", "blue");
@@ -306,10 +315,12 @@ d3.json(data_path + "web_data_cp.json", function(data) {
       .data(rows)
       .enter()
       .append("text")
-      .attr("x", species_start+width_max_col+col_spacing)
+      .attr("x", species_col_start)
       .attr("class", "column species")
-      .text(function(d) { return truncate(d.name, 30, "..."); })
-      .style("fill", "grey");
+      .text(function(d) { return truncate(d.name, trunc_chars, "..."); })
+      .style("fill", "grey")
+      .append("title")
+      .text(function(d) { return d.name; })
 
     svg.selectAll(".mouse_rect")
       .data(points) 
