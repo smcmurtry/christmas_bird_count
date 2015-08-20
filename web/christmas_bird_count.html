@@ -63,6 +63,7 @@ var margin_t = {top: 3, right: 260, bottom: 0, left: 10}, // table
   width_max_col = 55,
   width_med_col = 60,
   col_spacing = 10,
+  trans_t = 700,
   sort_dict = {'Max': {'ascending': 'max_sort_a', 'descending': 'max_sort_d'},
                'Median': {'ascending': 'median_sort_a', 'descending': 'median_sort_d'},
                'Species': {'ascending': 'species_sort_a', 'descending': 'species_sort_d'}};
@@ -89,8 +90,6 @@ var svg_hist = create_svg(".div-header", margin_h, width, height_h);
 var svg_header = create_svg(".div-header", margin_a, width, height_a);
 var svg = create_svg(".div-body", margin_t, width, height_t);
 
-
-
 d3.json(data_path + "web_data_cp.json", function(data) {
 
   x.domain([start_year, end_year]);
@@ -116,51 +115,54 @@ d3.json(data_path + "web_data_cp.json", function(data) {
     set_circle_size();
   })
 
-  d3.selectAll(".label").on("click", function() {
-    var text = d3.select(this).text();
-    sort_prop = sort_dict[text];
-    set_y_position();
-  })
-
   d3.selectAll(".sort")
-  .on("click", function(p) {
-    var sel = d3.select(this);
-    if (sel.attr("class") == "sort icon" || sel.attr("class") == "sort descending icon") {
-      d3.selectAll(".sort").attr("class", "sort icon");
-      sel.attr("class", "sort ascending icon");
-      sort_prop = sort_dict[sel.attr("name")]['ascending'];
+    .on("click", function(p) {
+      var sel = d3.select(this);
+      if (sel.attr("class") == "sort icon" || sel.attr("class") == "sort ascending icon") {
+        d3.selectAll(".sort").attr("class", "sort icon");
+        sel.attr("class", "sort descending icon");
+        sort_prop = sort_dict[sel.attr("name")]['descending'];
 
-    } else if ( sel.attr("class") == "sort ascending icon") {
-      d3.selectAll(".sort").attr("class", "sort icon");
-      sel.attr("class", "sort descending icon");
-      sort_prop = sort_dict[sel.attr("name")]['descending']
-    }
-    set_y_position();
+      } else if ( sel.attr("class") == "sort descending icon") {
+        d3.selectAll(".sort").attr("class", "sort icon");
+        sel.attr("class", "sort ascending icon");
+        sort_prop = sort_dict[sel.attr("name")]['ascending']
+      }
+      set_y_position();
   })
 
   function set_y_position() {
-    d3.selectAll("circle")
+
+    d3.selectAll("circle")//.transition().duration(trans_t)
       .attr("cy", function(d) { return (d[sort_prop]+1)*row_h; });
-    d3.selectAll(".mouse_rect")
+    d3.selectAll(".mouse_rect")//.transition().duration(trans_t)
       .attr("y", function(d) { return d[sort_prop]*row_h+ row_h/2; });
-    d3.selectAll('.div-body .value')
+    d3.selectAll('.div-body .value')//.transition().duration(trans_t)
       .attr("y", function(d) { return (d[sort_prop]+1)*row_h - circle_max_size - 1; });
-    d3.selectAll(".column")
+    d3.selectAll(".column")//.transition().duration(trans_t)
       .attr("y", function(d) { return (d[sort_prop]+1)*row_h + 5; });
-    d3.selectAll(".text-rect")
-      .attr("y", function(d) { return (d[sort_prop]+1)*row_h - circle_max_size - 12; } ) 
+    d3.selectAll(".text-rect")//.transition().duration(trans_t)
+      .attr("y", function(d) { return (d[sort_prop]+1)*row_h - circle_max_size - 12; } )
   }
 
   function set_circle_size() {
-    d3.selectAll("circle")
-      .attr("r", function(d) { 
-        if (scale_type == 1) {
-          rScale.domain([0, d.max_count]);
-        } else {
-          rScale.domain([0, 3400]);
-        }
+    if (d3.selectAll("circle").attr("r") > 0) {
+      d3.selectAll("circle")
+        .transition()
+        .duration(trans_t)
+        .call(set_r)
+    } else {
+      d3.selectAll("circle")
+        .call(set_r)
+    }
+
+    function set_r(sel) {
+      sel.attr("r", function(d) { 
+        if (scale_type == 1) { rScale.domain([0, d.max_count]); } 
+        else { rScale.domain([0, 3400]); }
         return rScale( (d.count=='CP' ? 1 : d.count) ); 
       })
+    }
   }
 
   function mouseover_1(p) {
@@ -238,11 +240,6 @@ d3.json(data_path + "web_data_cp.json", function(data) {
     }
     return [points, rows];
   }
-
-  // function draw_header() {
-
-  // }
-
 
   function draw_rows() {
 
@@ -371,6 +368,7 @@ d3.json(data_path + "web_data_cp.json", function(data) {
       function accessor(d) {
         if (val == 1) { return d.n_spc; } 
         else { return d.tot_count; }
+
       }
 
       svg_hist.selectAll("g").remove();
@@ -419,7 +417,6 @@ d3.json(data_path + "web_data_cp.json", function(data) {
         .attr("fill", "grey")
         .on("mouseover", mouseover_1)
         .on("mouseout", mouseout_1);
-
     }
   })
 });
