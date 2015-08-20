@@ -34,10 +34,15 @@
 
 var data_path = '../data/'; //dir_christmas_bird_count/
 
+var window_width;
+if (window.innerWidth > 1400) { window_width = 1400; }
+else { window_width = window.innerWidth - 30; } // this includes the left margin and vertical scrollbar
+
+
 var margin_t = {top: 3, right: 260, bottom: 0, left: 10}, // table
   margin_a = {top: 27, right: 260, bottom: 0, left: 10}, // axis
   margin_h = {top: 13, right: 260, bottom: 12, left: 10}, // histogram
-  width = 1200 - margin_t.right - margin_t.left, // 1100
+  width = window_width - margin_t.right - margin_t.left, // 1100
   height_t = 3000 - margin_t.top - margin_t.bottom,
   height_a = 30 - margin_a.top - margin_a.bottom,
   height_h = 100 - margin_h.top - margin_h.top,
@@ -50,11 +55,13 @@ var margin_t = {top: 3, right: 260, bottom: 0, left: 10}, // table
   button_legend_h = 150,
   width_max_col = 55,
   width_med_col = 60,
-  col_spacing = 10;
+  col_spacing = 10,
+  sort_dict = {'Max':'max_sort_a', 'Median':'median_sort_a', 'Species':'species_sort_a'};
 
-var year_col_w, bar_val;
+var year_col_w, bar_val, sort_prop, scale_type;
 
-var window_width = window.innerWidth;
+sort_prop = 'orig_sort';
+scale_type = 1;
 
 var x = d3.scale.linear()
   .range([0, width]);
@@ -65,6 +72,9 @@ var xAxis = d3.svg.axis()
   .scale(x)
   .orient("top")
   .tickFormat(formatYears);
+
+var rScale = d3.scale.pow().exponent(.5) // changed from .linear() which is wrong!!! the circle's area should map linearly to # of observations, not the radius!!!
+               .range([0, circle_max_size]);
 
 var svg_hist = create_svg(".div-header", margin_h, width, height_h);
 var svg_header = create_svg(".div-header", margin_a, width, height_a);
@@ -88,32 +98,43 @@ d3.json(data_path + "web_data_cp.json", function(data) {
   add_label(header, record_end+width_max_col, 0, "Count", "end", "label");
   add_label(header, record_end+width_max_col+col_spacing, 0, "Species", "start", "label");
 
-  draw_rows(1);
+  draw_rows();
 
   d3.selectAll("input").on("change", function() { 
-      draw_rows(this.value); 
+    scale_type = this.value;
+    set_circle_size();
   })
 
   d3.selectAll(".label").on("click", function() {
-    var sort_prop = {'Max':'max_sort', 'Median':'orig_sort', 'Species':'orig_sort'};
     var text = d3.select(this).text();
-
-    d3.selectAll("circle")
-      .attr("cy", function(d) { return (d[sort_prop[text]]+1)*row_h; });
-
-    d3.selectAll(".mouse_rect")
-      .attr("y", function(d) { return d[sort_prop[text]]*row_h+ row_h/2; });
-
-    d3.selectAll('.div-body .value')
-      .attr("y", function(d) { return (d[sort_prop[text]]+1)*row_h - circle_max_size - 1; });
-
-    d3.selectAll(".column")
-      .attr("y", function(d) { return (d[sort_prop[text]]+1)*row_h + 5; });
-
-    d3.selectAll(".text-rect")
-      .attr("y", function(d) { return (d[sort_prop[text]]+1)*row_h - circle_max_size - 12; } ) 
-    
+    sort_prop = sort_dict[text];
+    set_y_position();
   })
+
+  function set_y_position() {
+    d3.selectAll("circle")
+      .attr("cy", function(d) { return (d[sort_prop]+1)*row_h; });
+    d3.selectAll(".mouse_rect")
+      .attr("y", function(d) { return d[sort_prop]*row_h+ row_h/2; });
+    d3.selectAll('.div-body .value')
+      .attr("y", function(d) { return (d[sort_prop]+1)*row_h - circle_max_size - 1; });
+    d3.selectAll(".column")
+      .attr("y", function(d) { return (d[sort_prop]+1)*row_h + 5; });
+    d3.selectAll(".text-rect")
+      .attr("y", function(d) { return (d[sort_prop]+1)*row_h - circle_max_size - 12; } ) 
+  }
+
+  function set_circle_size() {
+    d3.selectAll("circle")
+      .attr("r", function(d) { 
+        if (scale_type == 1) {
+          rScale.domain([0, d.max_count]);
+        } else {
+          rScale.domain([0, 3400]);
+        }
+        return rScale( (d.count=='CP' ? 1 : d.count) ); 
+      })
+  }
 
   function mouseover_1(p) {
     var year = d3.select(this).data()[0].yr;
@@ -129,18 +150,18 @@ d3.json(data_path + "web_data_cp.json", function(data) {
 
   function mouseover_2(p) {
     var year = d3.select(this).data()[0].year;
-    var orig_sort = d3.select(this).data()[0].orig_sort;
+    var sort_i = d3.select(this).data()[0][sort_prop];
 
     d3.selectAll("circle")
-      .filter(function(d) { return d.year == year && d.orig_sort == orig_sort; })
+      .filter(function(d) { return d.year == year && d[sort_prop] == sort_i; })
       .attr("fill", "red")
 
     d3.selectAll(".text-rect")
-      .filter(function(d) { return d.year == year && d.orig_sort == orig_sort; })
+      .filter(function(d) { return d.year == year && d[sort_prop] == sort_i; })
       .style("display", "block");
 
     d3.selectAll("text.value")
-      .filter(function(d) { return d.year == year && d.orig_sort == orig_sort; })
+      .filter(function(d) { return d.year == year && d[sort_prop] == sort_i; })
       .style("display", "block");
   }
 
@@ -152,8 +173,8 @@ d3.json(data_path + "web_data_cp.json", function(data) {
   function mouseout_2(p) {
     d3.selectAll("circle")
       .attr("fill", function(d) {
-        if (d.count == d.median) { return "blue"; }
-        else if (d.count == d.max) { return "green"; }
+        if (d.count == d.median_count) { return "blue"; }
+        else if (d.count == d.max_count) { return "green"; }
         return "grey";
       })
     d3.selectAll("text.value").style("display","none");
@@ -176,45 +197,35 @@ d3.json(data_path + "web_data_cp.json", function(data) {
       rows.push(row);
 
       for (var i = 0; i < data[j]['observations'].length; i++) {
-        var point = {'year': data[j]['observations'][i][0],
-                     'count': data[j]['observations'][i][1],
-                     'max': data[j]['max_count'],
-                     'median': data[j]['median_count'],
-                     'max_sort': data[j]['max_sort'],
-                     'orig_sort': j
-                    }
+        var point = {};
+
+        point['year'] = data[j]['observations'][i][0];
+        point['count'] = data[j]['observations'][i][1];
+
+        for (var k = Object.keys(row).length - 1; k >= 0; k--) {
+          var key = Object.keys(row)[k];
+          point[key] = row[key];
+        };
         points.push(point);
       }
     }
     return [points, rows];
   }
 
-  function draw_rows(value) {
+  function draw_rows() {
 
-    var rScale = d3.scale.pow().exponent(.5) // changed from .linear() which is wrong!!! the circle's area should map linearly to # of observations, not the radius!!!
-      .range([0, circle_max_size]);
     // svg.selectAll("g").remove();
     var res = compile_data();
     var points = res[0],
         rows = res[1];
-
     svg.selectAll("circle")
       .data(points)
       .enter()
       .append("circle")
       .attr("cx", function(d) { return x(d.year)})
-      .attr("cy", function(d) { return (d.orig_sort+1)*row_h; })
-      .attr("r", function(d) { 
-        if (value == 1) {
-          rScale.domain([0, d.max]);
-        } else {
-          rScale.domain([0, 3400]);
-        }
-        return rScale( (d.count=='CP' ? 1 : d.count) ); 
-      })
       .attr("fill", function(d) {
-        if (d.count == d.median) { return "blue"; }
-        else if (d.count == d.max) { return "green"; }
+        if (d.count == d.median_count) { return "blue"; }
+        else if (d.count == d.max_count) { return "green"; }
         return "grey";
       });
 
@@ -223,7 +234,6 @@ d3.json(data_path + "web_data_cp.json", function(data) {
       .enter()
       .append("rect")
       .attr("class", "text-rect")
-      .attr("y", function(d) { return (d.orig_sort+1)*row_h - circle_max_size - 12; } ) 
       .attr("x", function(d) { return x(d.year) - year_col_w/2; })
       .attr("width", function(d) { return (d.count > 0 || d.count == 'CP') ? circle_max_size*2 : 0; })
       .attr("height", 11)
@@ -236,7 +246,6 @@ d3.json(data_path + "web_data_cp.json", function(data) {
       .enter()
       .append("text")
       .attr("text-anchor", "middle")
-      .attr("y", function(d) { return (d.orig_sort+1)*row_h - circle_max_size - 1; })
       .attr("x", function(d) { return x(d.year); })
       .attr("class", "value")
       .text(function(d) { return val_formatter_2(d.count); })
@@ -272,21 +281,20 @@ d3.json(data_path + "web_data_cp.json", function(data) {
       .text(function(d) { return truncate(d.name, 30, "..."); })
       .style("fill", "grey");
 
-    d3.selectAll(".column")
-      .attr("y", function(d) { return (d.orig_sort+1)*row_h + 5; });
-
     svg.selectAll(".mouse_rect")
       .data(points) 
       .enter()
       .append("rect")
       .attr("class", "mouse_rect")
       .attr("x", function(d) { return x(d.year) - year_col_w/2; })
-      .attr("y", function(d) { return d.orig_sort*row_h+ row_h/2; })
       .attr("width", year_col_w)
       .attr("height", row_h)
       .attr("opacity", 0)
       .on("mouseover", mouseover_2)
       .on("mouseout", mouseout_2)
+
+    set_y_position();
+    set_circle_size();
   }
 
   d3.json(data_path + "bar_data.json", function(bar_data) {
