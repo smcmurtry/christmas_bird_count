@@ -104,8 +104,14 @@ d3.json(data_path + "web_data_cp.json", function(data) {
     d3.selectAll(".mouse_rect")
       .attr("y", function(d) { return d[sort_prop[text]]*row_h+ row_h/2; });
 
-    d3.select('.div-body').selectAll(".value")
+    d3.selectAll('.div-body .value')
       .attr("y", function(d) { return (d[sort_prop[text]]+1)*row_h - circle_max_size - 1; });
+
+    d3.selectAll(".column")
+      .attr("y", function(d) { return (d[sort_prop[text]]+1)*row_h + 5; });
+
+    d3.selectAll(".text-rect")
+      .attr("y", function(d) { return (d[sort_prop[text]]+1)*row_h - circle_max_size - 12; } ) 
     
   })
 
@@ -243,7 +249,6 @@ d3.json(data_path + "web_data_cp.json", function(data) {
       .append("text")
       .attr("class", "column max")
       .attr("text-anchor", "end")
-      .attr("y", function(d) { return (d.orig_sort+1)*row_h + 5; })
       .attr("x", record_end)
       .text(function(d) { return d.max_count; })
       .style("fill", "green");
@@ -253,7 +258,6 @@ d3.json(data_path + "web_data_cp.json", function(data) {
       .enter()
       .append("text")
       .attr("text-anchor", "end")
-      .attr("y", function(d) { return (d.orig_sort+1)*row_h + 5; })
       .attr("x", record_end+width_max_col)
       .attr("class", "column median")
       .text(function(d) { return d.median_count; })
@@ -263,11 +267,13 @@ d3.json(data_path + "web_data_cp.json", function(data) {
       .data(rows)
       .enter()
       .append("text")
-      .attr("y", function(d) { return (d.orig_sort+1)*row_h + 5; })
       .attr("x", species_start+width_max_col+col_spacing)
       .attr("class", "column species")
       .text(function(d) { return truncate(d.name, 30, "..."); })
       .style("fill", "grey");
+
+    d3.selectAll(".column")
+      .attr("y", function(d) { return (d.orig_sort+1)*row_h + 5; });
 
     svg.selectAll(".mouse_rect")
       .data(points) 
