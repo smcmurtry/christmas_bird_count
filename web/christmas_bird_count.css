@@ -20,9 +20,18 @@ body {
 }
 
 .legend .select {
-  float: left;
+  /*float: left;*/
   height: 40px;
   margin-right: 20px;
+}
+
+.legend {
+  float: left;
+}
+
+.select {
+  width: 500px;
+  margin-bottom: 5px;
 }
 
 text.column, .button-label, .col-header-txt {
@@ -68,7 +77,16 @@ text.column, .col-header-txt {
 }
 
 .a {
-  margin-bottom: 10px;
+  /*margin-bottom: 10px;*/
+  position: absolute;
+  top: 95px;
+  left: 0px;
+}
+
+.b {
+   position: absolute;
+  top: 115px;
+  left: 0px; 
 }
 
 .button-desc {
@@ -136,4 +154,9 @@ text.column, .col-header-txt {
   fill: #e41a1c;
   /*fill: #fdc086;*/
   /*fill:red;*/
+}
+
+.selected-year {
+  stroke: #e41a1c;
+  font-weight: lighter;
 }
