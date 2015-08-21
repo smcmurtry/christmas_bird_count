@@ -28,6 +28,10 @@ text.column, .button-label, .col-header-txt {
   font-size:14px;
 }
 
+.button-label, .select {
+  padding-top: 2px;
+}
+
 text.label {
   font-size: 14px;
   font-weight: bold;
@@ -69,6 +73,7 @@ text.column, .col-header-txt {
 .button-desc {
   /*float: right;*/
   width: 800px;
+  padding-top: 2px;
 }
 
 .circle .max {
@@ -105,12 +110,5 @@ text.column, .col-header-txt {
 
 .col-header-div {
   position: absolute;
-    width: 90px;
-
+  width: 90px;
 }
-
-/*.sort {
-  padding-top: 5px;
-}
-
-.sp .sort { padding-top: 0px;}*/
