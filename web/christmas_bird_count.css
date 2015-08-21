@@ -2,7 +2,12 @@ body {
   font-family: Helvetica, sans-serif;
   font-size:14px;
   margin-top: 0px;
-}
+/*  background-color: black;
+*/}
+
+/*.legend, .div-header, h1 {
+  background-color: black;
+}*/
 
 .axis path, .axis line {
   fill: none;
@@ -12,10 +17,6 @@ body {
 
 .tick text {
   fill:#999;
-}
-
-g.species.active {
-  cursor:pointer;
 }
 
 .legend .select {
@@ -54,7 +55,7 @@ text.column, .col-header-txt {
 }
 
 .div-body svg {
-  margin-top: 240px;
+  margin-top: 250px;
 }
 
 .main {
@@ -111,4 +112,28 @@ text.column, .col-header-txt {
 .col-header-div {
   position: absolute;
   width: 90px;
+}
+
+.max {
+  /*fill: green;*/
+  /*fill: #7fc97f*/
+  fill: #4daf4a;
+}
+
+.median {
+  fill: #377eb8;
+  /*fill: blue;*/
+  /*fill: #984ea3;*/
+  /*fill: #beaed4; */
+}
+
+.species, .normal {
+  fill: grey;
+  /*fill: #ffff99;*/
+}
+
+.selected {
+  fill: #e41a1c;
+  /*fill: #fdc086;*/
+  /*fill:red;*/
 }

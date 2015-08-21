@@ -52,7 +52,7 @@ var margin_t = {top: 3, right: 300, bottom: 0, left: 10}, // table
   height_a = 30 - margin_a.top - margin_a.bottom,
   height_h = 100 - margin_h.top - margin_h.top,
   row_h = 20,
-  circle_max_size = 8,
+  circle_max_size = 10,//9,//14,
   start_year = 1952,
   end_year = 2014,
   button_legend_top = 125,
@@ -170,8 +170,7 @@ d3.json(data_path + "web_data_cp.json", function(data) {
   function mouseover_1(p) {
     var year = d3.select(this).data()[0].yr;
 
-    d3.select(this)
-      .attr("fill", "red");
+    d3.select(this).classed({"selected": true});
 
     d3.select(".div-header")
       .selectAll("text.value")
@@ -181,36 +180,34 @@ d3.json(data_path + "web_data_cp.json", function(data) {
 
   function mouseover_2(p) {
     var year = d3.select(this).data()[0].year;
-    var sort_i = d3.select(this).data()[0][sort_prop];
+    var row_i = d3.select(this).data()[0][sort_prop];
 
     d3.selectAll("circle")
-      .filter(function(d) { return d.year == year && d[sort_prop] == sort_i; })
-      .attr("fill", "red")
+      .filter(function(d) { return d.year == year && d[sort_prop] == row_i; })
+      .classed({"selected": true});
+
+    d3.selectAll(".species")
+      .filter(function(d) { return d[sort_prop] == row_i; })
+      .classed({"selected": true});
 
     d3.selectAll(".text-rect")
-      .filter(function(d) { return d.year == year && d[sort_prop] == sort_i; })
+      .filter(function(d) { return d.year == year && d[sort_prop] == row_i; })
       .style("display", "block");
 
     d3.selectAll("text.value")
-      .filter(function(d) { return d.year == year && d[sort_prop] == sort_i; })
+      .filter(function(d) { return d.year == year && d[sort_prop] == row_i; })
       .style("display", "block");
   }
 
   function mouseout_1(p) {
-    d3.select(this).attr("fill", "grey");
+    d3.select(this).classed({"selected": false});
     d3.select(".div-header").selectAll("text.value").style("display", "none");
   }
 
   function mouseout_2(p) {
-    d3.selectAll("circle")
-      .attr("fill", function(d) {
-        if (d.count == d.median_count) { return "blue"; }
-        else if (d.count == d.max_count) { return "green"; }
-        return "grey";
-      })
-    d3.selectAll("text.value").style("display","none");
-    d3.selectAll(".text-rect").style("display","none");
-
+    d3.selectAll(".selected").classed({"selected": false});
+    d3.selectAll("text.value").style("display", "none");
+    d3.selectAll(".text-rect").style("display", "none");
   }
 
   function compile_data() {
@@ -253,10 +250,10 @@ d3.json(data_path + "web_data_cp.json", function(data) {
       .enter()
       .append("circle")
       .attr("cx", function(d) { return x(d.year)})
-      .attr("fill", function(d) {
-        if (d.count == d.median_count) { return "blue"; }
-        else if (d.count == d.max_count) { return "green"; }
-        return "grey";
+      .attr("class", function(d) {
+        if (d.count == d.median_count) { return "median"; }
+        else if (d.count == d.max_count) { return "max"; }
+        return "normal";
       });
 
     svg.selectAll(".text-rect")
@@ -289,8 +286,7 @@ d3.json(data_path + "web_data_cp.json", function(data) {
       .attr("class", "column max")
       .attr("text-anchor", "end")
       .attr("x", max_col_end)
-      .text(function(d) { return d.max_count; })
-      .style("fill", "green");
+      .text(function(d) { return d.max_count; });
 
     svg.selectAll('.column .median')
       .data(rows)
@@ -299,8 +295,7 @@ d3.json(data_path + "web_data_cp.json", function(data) {
       .attr("text-anchor", "end")
       .attr("x", median_col_end)
       .attr("class", "column median")
-      .text(function(d) { return d.median_count; })
-      .style("fill", "blue");
+      .text(function(d) { return d.median_count; });
 
     svg.selectAll('.column .species')
       .data(rows)
@@ -309,9 +304,8 @@ d3.json(data_path + "web_data_cp.json", function(data) {
       .attr("x", species_col_start)
       .attr("class", "column species")
       .text(function(d) { return truncate(d.name, trunc_chars, "..."); })
-      .style("fill", "grey")
       .append("title")
-      .text(function(d) { return d.name; })
+      .text(function(d) { return d.name; });
 
     svg.selectAll(".mouse_rect")
       .data(points) 
@@ -348,7 +342,7 @@ d3.json(data_path + "web_data_cp.json", function(data) {
       .attr("checked", true)
     rad_1.append("div")
       .attr("class", "button-label")
-      .text("Total Number of Species Counted (Per Year)");
+      .text("Total number of species counted");
 
     var rad_2 = button_container.append("div")
       .attr("class", "radio");
@@ -358,7 +352,7 @@ d3.json(data_path + "web_data_cp.json", function(data) {
       .attr("value", "2")
     rad_2.append("div")
       .attr("class", "button-label")
-      .text("Total Number of Birds Counted (Per Year)");
+      .text("Total number of individual birds counted");
 
     draw_bars(1);
 
@@ -372,7 +366,6 @@ d3.json(data_path + "web_data_cp.json", function(data) {
       function accessor(d) {
         if (val == 1) { return d.n_spc; } 
         else { return d.tot_count; }
-
       }
 
       svg_hist.selectAll("g").remove();
@@ -418,7 +411,7 @@ d3.json(data_path + "web_data_cp.json", function(data) {
         .attr("x", 1)
         .attr("width", year_col_w - 2)
         .attr("height", function(d) { return height_h - y(accessor(d)); })
-        .attr("fill", "grey")
+        .attr("class", "normal")
         .on("mouseover", mouseover_1)
         .on("mouseout", mouseout_1);
     }
